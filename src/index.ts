@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import morgan from 'morgan'
 // import { route } from './routes'
 import multer from 'multer'
+import { route } from './routes'
 // import bodyParser from 'body-parser'
 
 dotenv.config()
@@ -23,7 +24,7 @@ app.use(upload.single('undefined'))
 app.use(express.static('public'))
 
 app.use(morgan('combined'))
-// route(app)
+route(app)
 
 // app.get('/users', function (req, res) {
 //   res.status(200)
