@@ -5,6 +5,7 @@ import morgan from 'morgan'
 // import { route } from './routes'
 import multer from 'multer'
 import { route } from './routes'
+import { mysqlCon } from './configs/db'
 // import bodyParser from 'body-parser'
 
 dotenv.config()
@@ -24,12 +25,21 @@ app.use(upload.single('undefined'))
 app.use(express.static('public'))
 
 app.use(morgan('combined'))
-route(app)
+
+mysqlCon.connect(function (err) {
+  if (err) throw err
+  console.log('Connected!!!')
+})
 
 // app.get('/users', function (req, res) {
-//   res.status(200)
-//   res.json(USERS)
+//   console.log(123)
+//   var sql = 'SELECT * FROM users'
+//   mysqlCon.query(sql, function (err, results) {
+//     if (err) throw err
+//     res.send(results)
+//   })
 // })
+route(app)
 
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at https://localhost:${port}`)
