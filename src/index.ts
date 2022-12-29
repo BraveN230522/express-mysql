@@ -5,7 +5,7 @@ import morgan from 'morgan'
 // import { route } from './routes'
 import multer from 'multer'
 import { route } from './routes'
-import { mysqlCon } from './configs/db'
+import { myDataSource } from './configs/db'
 // import bodyParser from 'body-parser'
 
 dotenv.config()
@@ -26,10 +26,15 @@ app.use(express.static('public'))
 
 app.use(morgan('combined'))
 
-mysqlCon.connect(function (err) {
-  if (err) throw err
-  console.log('Connected!!!')
-})
+// establish database connection
+myDataSource
+  .initialize()
+  .then(() => {
+    console.log('Data Source has been initialized!')
+  })
+  .catch((err) => {
+    console.error('Error during Data Source initialization:', err)
+  })
 
 // app.get('/users', function (req, res) {
 //   console.log(123)
@@ -39,6 +44,7 @@ mysqlCon.connect(function (err) {
 //     res.send(results)
 //   })
 // })
+
 route(app)
 
 app.listen(port, () => {
