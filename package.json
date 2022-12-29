@@ -7,13 +7,12 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
     "start": "node dist/index.js",
-    "dev": "set ENV=DEV&& env ENV=DEV concurrently \"npx tsc --watch\" \"nodemon --experimental-specifier-resolution=node -q dist/index.js\"",
-    "prod": "set ENV=PROD&& env ENV=PROD concurrently \"npx tsc --watch\" \"nodemon --experimental-specifier-resolution=node -q dist/index.js\""
+    "dev": "set ENV=DEV&& env ENV=DEV concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
+    "prod": "set ENV=PROD&& env ENV=PROD concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",

@@ -5,7 +5,7 @@ import { adminRoute, noAuthAdminRoutes } from '../configs'
 import { expressjwt } from 'express-jwt'
 import { noAuthRoutesToArr } from '../utilities'
 
-export function route(app: Express) {
+export const route = (app: Express) => {
   // app.use(
   //   expressjwt({
   //     secret: process.env.JWT_KEY || '1',
