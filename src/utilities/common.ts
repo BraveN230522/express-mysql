@@ -1,14 +1,18 @@
 import _ from 'lodash'
-
-export const dataMappingSuccess = (
+interface IDataMappingSuccess {
   data:
     | {
         [key: string]: any
       }
-    | Array<any>,
+    | Array<any>
+  pagination?: {
+    [key: string]: any
+  }
   msg?: string
-) => {
-  return { data, message: msg || 'Success' }
+}
+
+export const dataMappingSuccess = ({ data, msg, pagination }: IDataMappingSuccess) => {
+  return { data, pagination, message: msg || 'Success' }
 }
 
 export const dataMapping = (
@@ -37,4 +41,12 @@ export const isJsonString = (str: string) => {
     return false
   }
   return true
+}
+
+export const myMapOmit = (data: any[], toOmit: string[]) => {
+  return _.map(data, (item) => _.omit(item, toOmit))
+}
+
+export const myMapPick = (data: any[], toOmit: string[]) => {
+  return _.map(data, (item) => _.pick(item, toOmit))
 }

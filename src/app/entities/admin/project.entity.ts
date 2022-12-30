@@ -1,23 +1,20 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable } from 'typeorm'
-import { Projects } from './project.entity'
+import { Users } from './user.entity'
 
 @Entity()
-export class Users {
+export class Projects {
   @PrimaryGeneratedColumn()
   id: number
-
-  @Column()
-  inviteId: string
 
   @Column()
   name: string
 
   @Column()
-  email: string
+  slug: string
 
   @Column()
-  password: string
+  startDate: string
 
   @Column()
-  status: string
+  endDate: string
 }

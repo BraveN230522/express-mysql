@@ -6,4 +6,4 @@ const router = express.Router()
 
 router.post(noAuthAdminRoutes.login, AuthController.login)
 
-export { router as adminRouter }
+export { router as adminAuthRouter }

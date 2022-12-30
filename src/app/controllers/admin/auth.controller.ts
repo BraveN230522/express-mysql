@@ -13,13 +13,16 @@ class AuthControllerClass {
     const user = await myDataSource.getRepository(Auth).findOneBy({
       username: req.body.username,
     })
-    const match = await bcrypt.compare(req.body.password || '', user?.password || '')
+    const userPassword = user?.password as string
+    const match = await bcrypt.compare(req.body.password, userPassword)
     if (match) {
-      const token = jwt.sign({ id: user?.id, username: user?.username }, JWT_KEY || '1')
+      const token = jwt.sign({ id: user?.id, username: user?.username }, JWT_KEY)
       res.json(
         dataMappingSuccess({
-          username: user?.username,
-          token: 'Bearer ' + token,
+          data: {
+            username: user?.username,
+            token: 'Bearer ' + token,
+          },
         })
       )
     } else {
