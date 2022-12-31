@@ -2,9 +2,9 @@
 import express, { Express, Request, Response } from 'express'
 import dotenv from 'dotenv'
 import morgan from 'morgan'
-import { route } from './routes'
 import multer from 'multer'
 import { myDataSource } from './configs'
+import { route } from './app/routes'
 // import { route } from './routes'
 // import bodyParser from 'body-parser'import { DataSource } from 'typeorm'
 

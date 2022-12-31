@@ -15,13 +15,7 @@ export const dataMappingSuccess = ({ data, msg, pagination }: IDataMappingSucces
   return { data, pagination, message: msg || 'Success' }
 }
 
-export const dataMapping = (
-  data:
-    | {
-        [key: string]: any
-      }
-    | Array<any>
-) => {
+export const dataMapping = <T>(data: T) => {
   return { data }
 }
 
@@ -43,10 +37,10 @@ export const isJsonString = (str: string) => {
   return true
 }
 
-export const myMapOmit = (data: any[], toOmit: string[]) => {
-  return _.map(data, (item) => _.omit(item, toOmit))
+export const myMapOmit = <T>(data: T[], toOmit: string[]) => {
+  return _.compact(_.map(data, (item) => (item ? _.omit(item, toOmit) : null)))
 }
 
-export const myMapPick = (data: any[], toOmit: string[]) => {
-  return _.map(data, (item) => _.pick(item, toOmit))
+export const myMapPick = <T>(data: T[], toPick: string[]) => {
+  return _.compact(_.map(data, (item) => (item ? _.pick(item, toPick) : null)))
 }
