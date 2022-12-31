@@ -16,6 +16,9 @@ class AuthControllerClass {
     const match = await bcrypt.compare(req.body.password || '', user?.password || '')
     if (match) {
       const token = jwt.sign({ id: user?.id, username: user?.username }, JWT_KEY || '1')
+
+      await myDataSource.createQueryBuilder().update(Auth).set({ token }).where('id = :id', { id: user?.id }).execute()
+
       res.json(
         dataMappingSuccess({
           data: {

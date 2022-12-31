@@ -1,6 +1,6 @@
-import { AuthController } from '../../app/controllers/admin'
-import { noAuthAdminRoutes } from '../../configs'
 import express from 'express'
+import { noAuthAdminRoutes } from '../../../configs'
+import { AuthController } from '../../controllers/admin'
 
 const router = express.Router()
 

@@ -10,4 +10,10 @@ export class Auth {
 
   @Column()
   password: string
+
+  @Column({
+    unique: true,
+    nullable: true,
+  })
+  token: string
 }

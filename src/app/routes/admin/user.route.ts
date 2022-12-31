@@ -1,6 +1,6 @@
-import { UserController } from '../../app/controllers/admin'
-import { authAdminRoutes } from '../../configs'
 import express from 'express'
+import { authAdminRoutes } from '../../../configs'
+import { UserController } from '../../controllers/admin'
 
 const router = express.Router()
 
