@@ -17,8 +17,4 @@ export class Projects {
 
   @Column()
   endDate: string
-
-  @ManyToMany(() => Users)
-  @JoinTable()
-  categories: Users[]
 }
