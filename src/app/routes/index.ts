@@ -1,6 +1,6 @@
 import { Express, NextFunction, Request, Response } from 'express'
 import { expressjwt } from 'express-jwt'
-import { adminAuthRouter, adminUserRouter } from './admin'
+import { adminAuthRouter, adminProjectRouter, adminUserRouter } from './admin'
 import { adminRoute, myDataSource, noAuthAdminRoutes } from '../../configs'
 import { Auth } from '../entities/admin'
 import { noAuthRoutesToArr } from '../../utilities'
@@ -30,6 +30,7 @@ export const route = (app: Express) => {
 
   app.use(adminRoute, adminAuthRouter)
   app.use(adminRoute, adminUserRouter)
+  app.use(adminRoute, adminProjectRouter)
 
   app.use((req: Request, res: Response, next: NextFunction) => {
     res.status(404).send({ error: 'Not found' })

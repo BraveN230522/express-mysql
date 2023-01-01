@@ -17,4 +17,12 @@ export class Projects {
 
   @Column()
   endDate: string
+
+  @ManyToMany(() => Users, (user) => user.id, { cascade: true })
+  @JoinTable({
+    name: 'users_projects',
+    joinColumn: { name: 'projectId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'userId', referencedColumnName: 'id' },
+  })
+  users: Users[]
 }

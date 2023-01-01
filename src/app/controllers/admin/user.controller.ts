@@ -19,10 +19,24 @@ class UserControllerClass {
   async getUserDetails(req: Request, res: Response, next: NextFunction) {
     const userId = Number(req.params.id)
     const user = await myDataSource.getRepository(Users).findOneBy({ id: userId })
+    const projects = await myDataSource
+      .createQueryBuilder(Users, 'user')
+      .cache(CACHING_TIME)
+      .where('user.id = :id', { id: userId })
+      .innerJoin('users_projects', 'users_projects')
+      .getRawMany()
 
     if (!user || _.isEmpty(user)) return res.status(404).json(dataMapping({ message: 'No user found' }))
 
-    res.status(200).json(dataMappingSuccess({ data: user }))
+    return res.status(200).json(
+      dataMappingSuccess({
+        data: {
+          ...user,
+          projectCount: projects.length,
+          taskCount: projects.length,
+        },
+      })
+    )
   }
 
   async getUserProjects(req: Request, res: Response, next: NextFunction) {
