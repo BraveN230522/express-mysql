@@ -20,9 +20,9 @@ class UserControllerClass {
     const userId = Number(req.params.id)
     const user = await myDataSource.getRepository(Users).findOneBy({ id: userId })
     const projects = await myDataSource
-      .createQueryBuilder(Users, 'user')
+      .createQueryBuilder(Users, 'users')
       .cache(CACHING_TIME)
-      .where('user.id = :id', { id: userId })
+      .where('users.id = :id', { id: userId })
       .innerJoin('users_projects', 'users_projects')
       .getRawMany()
 

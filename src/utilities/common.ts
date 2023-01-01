@@ -44,3 +44,18 @@ export const myMapOmit = <T>(data: T[], toOmit: string[]) => {
 export const myMapPick = <T>(data: T[], toPick: string[]) => {
   return _.compact(_.map(data, (item) => (item ? _.pick(item, toPick) : null)))
 }
+
+export const numberInputs = (input: any) =>
+  Object.keys(input).reduce((acc: any, val: any) => {
+    acc[val] = +input[val]
+    return acc
+  }, {})
+
+export const genPagination = (page: number, perPage: number, arrayLength: number) => {
+  return {
+    page: page,
+    perPage: perPage,
+    pageCount: Math.ceil(arrayLength / perPage),
+    totalCount: arrayLength,
+  }
+}
