@@ -32,7 +32,7 @@ class ProjectControllerClass {
         .status(200)
         .json(dataMappingSuccess({ data: mappingProjects, pagination: genPagination(page, perPage, projectsLength) }))
     } catch (error: any) {
-      res.status(600).json(error)
+      res.status(500).json(error)
     }
   }
 

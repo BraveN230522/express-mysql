@@ -63,3 +63,13 @@ export const genPagination = (page: number, perPage: number, arrayLength: number
     totalCount: arrayLength,
   }
 }
+
+export function asyncMap<T, U>(
+  array: T[],
+  callbackfn: (value: T, index: number, array: T[]) => Promise<U>
+): Promise<U[]> {
+  return Promise.all(_.map(array,callbackfn))
+}
+
+export const asyncFilter = async <T>(arr: T[], callbackfn: (value: T, index: number, array: T[])) =>
+  Promise.all(_.map(arr,callbackfn)).then((results) => _.filter(arr,(_v, index) => results[index]))
