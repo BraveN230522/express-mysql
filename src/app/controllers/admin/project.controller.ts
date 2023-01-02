@@ -9,11 +9,31 @@ import { In } from 'typeorm'
 
 class ProjectControllerClass {
   async getProject(req: Request, res: Response, next: NextFunction) {
-    const projects = await myDataSource.getRepository(Projects).find()
-    if (!projects || projects?.length === 0) return res.status(404).json(dataMapping({ message: 'No projects' }))
-    const mappingProjects = myMapOmit(projects, [])
+    try {
+      const { perPage, page } = numberInputs(req.body)
 
-    res.status(200).json(dataMappingSuccess({ data: mappingProjects }))
+      const projects = await myDataSource
+        .createQueryBuilder(Projects, 'projects')
+        .skip((page - 1) * perPage)
+        .take(perPage || 1)
+        .getMany()
+
+      const projectsLength = await myDataSource
+        .createQueryBuilder(Projects, 'projects')
+        .cache(CACHING_TIME)
+        .skip((page - 1) * perPage)
+        .take(perPage || 1)
+        .getCount()
+
+      if (!projects || projects?.length === 0) return res.status(404).json(dataMapping({ message: 'No projects' }))
+      const mappingProjects = myMapOmit(projects, [])
+
+      res
+        .status(200)
+        .json(dataMappingSuccess({ data: mappingProjects, pagination: genPagination(page, perPage, projectsLength) }))
+    } catch (error: any) {
+      res.status(600).json(error)
+    }
   }
 
   async getProjectDetails(req: Request, res: Response, next: NextFunction) {
@@ -59,7 +79,7 @@ class ProjectControllerClass {
         })
       )
     } catch (error) {
-      res.status(200).json(error)
+      res.status(500).json(error)
     }
   }
 

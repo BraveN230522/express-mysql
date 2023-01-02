@@ -45,9 +45,13 @@ export const myMapPick = <T>(data: T[], toPick: string[]) => {
   return _.compact(_.map(data, (item) => (item ? _.pick(item, toPick) : null)))
 }
 
-export const numberInputs = (input: any) =>
+export const numberInputs = (
+  input: any
+): {
+  [key: string]: number
+} =>
   Object.keys(input).reduce((acc: any, val: any) => {
-    acc[val] = +input[val]
+    acc[val] = +input[val] as number
     return acc
   }, {})
 
