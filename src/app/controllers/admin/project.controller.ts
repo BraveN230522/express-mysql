@@ -6,6 +6,7 @@ import { Projects, Users } from '../../entities/admin'
 import _ from 'lodash'
 import { CACHING_TIME } from '../../../environments'
 import { In } from 'typeorm'
+import slugify from 'slugify'
 
 class ProjectControllerClass {
   async getProject(req: Request, res: Response, next: NextFunction) {
@@ -83,22 +84,56 @@ class ProjectControllerClass {
     }
   }
 
-  async createUser(req: Request, res: Response, next: NextFunction) {
-    const usersTableLength = await myDataSource.createQueryBuilder(Users, 'user').cache(CACHING_TIME).getCount()
-    const user = new Users()
-    const projects: number[] = JSON.parse(req.body.defaultProject)
+  async createProject(req: Request, res: Response, next: NextFunction) {
+    const { name, slug, startDate, endDate } = req.body
+    const project = new Projects()
+    project.name = name
+    project.slug = slugify(slug, '_')
+    project.startDate = startDate
+    project.endDate = endDate
 
-    const projectsOfUser = await myDataSource.getRepository(Projects).find({ where: { id: In(projects) } })
+    await myDataSource.manager.save(project)
 
-    user.inviteId = 'Invite' + (usersTableLength + 1)
-    user.projects = projectsOfUser
-    user.status = UserStatus.Inactive
+    res.status(200).json(dataMappingSuccess({ data: project }))
+  }
 
-    await myDataSource.manager.save(user)
+  async updateProject(req: Request, res: Response, next: NextFunction) {
+    const { name, slug, startDate, endDate } = req.body
+    const projectId = Number(req.params.id)
+    const projectRepository = myDataSource.getRepository(Projects)
+    const projectToUpdate = await projectRepository.findOneBy({
+      id: projectId,
+    })
 
-    //Response handling
-    const mappingUser = _.omit(user, ['projects'])
-    res.status(200).json(dataMappingSuccess({ data: mappingUser }))
+    if (projectToUpdate) {
+      projectToUpdate.name = name
+      projectToUpdate.slug = slugify(slug, '_')
+      projectToUpdate.startDate = startDate
+      projectToUpdate.endDate = endDate
+
+      await projectRepository.save(projectToUpdate)
+      res.status(200).json(dataMappingSuccess({ data: projectToUpdate }))
+    }
+  }
+
+  async AddMemberToProject(req: Request, res: Response, next: NextFunction) {
+    const projectId = Number(req.params.id)
+    const projectRepository = myDataSource.getRepository(Projects)
+    const projectToUpdate = await projectRepository.findOne({
+      where: { id: projectId },
+      relations: ['users'],
+    })
+
+    const members: number[] = JSON.parse(req.body.memberIds)
+
+    const membersOfProject = await myDataSource.getRepository(Users).find({ where: { id: In(members) } })
+    if (projectToUpdate) {
+      const memberShouldBeAdded = _.differenceBy(membersOfProject, projectToUpdate.users, 'id')
+
+      projectToUpdate.users = [...projectToUpdate.users, ...memberShouldBeAdded]
+      await projectRepository.save(projectToUpdate)
+      res.status(200).json(dataMappingSuccess({ data: projectToUpdate }))
+    }
   }
 }
 

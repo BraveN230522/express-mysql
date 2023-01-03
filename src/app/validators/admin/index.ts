@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import { check, validationResult } from 'express-validator'
 import { asyncFilter, isJsonString } from '../../../utilities'
 import { myDataSource } from '../../../configs'
+import moment from 'moment'
 
 export const loginValidation = [
   check('username').notEmpty().withMessage('Username is a require field'),
@@ -43,6 +44,68 @@ export const createUserValidation = [
           }
         } else throw new Error('Default project must be an array')
       } else throw new Error('Default project must be an array')
+      return true
+    }),
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0] })
+    }
+    next()
+  },
+]
+
+export const createProjectValidation = [
+  check('name').notEmpty().withMessage('Name is a require field'),
+  check('slug').notEmpty().withMessage('Slug is a require field'),
+  check('startDate')
+    .notEmpty()
+    .withMessage('Start date is a require field')
+    .isDate({ format: 'YYYY-MM-DD' })
+    .withMessage('Start date is invalid')
+    .custom((startDate: string, { req }) => {
+      const endDate = req.body.endDate
+      const diffTime = moment(startDate, 'YYYY-MM-DD').diff(endDate)
+      return diffTime ? diffTime <= 0 : true
+    })
+    .withMessage('Start date must be less than end date'),
+
+  check('endDate')
+    .notEmpty()
+    .withMessage('End date is a require field')
+    .isDate({ format: 'YYYY-MM-DD' })
+    .withMessage('End date is invalid'),
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0] })
+    }
+    next()
+  },
+]
+
+export const AddMemberToProjectValidation = [
+  check('memberIds')
+    .notEmpty()
+    .withMessage('Member list is a require field')
+    .custom(async (memberIds: string, { req }) => {
+      if (isJsonString(req.body.memberIds)) {
+        const defaultMemArr: number[] = JSON.parse(memberIds)
+        if (Array.isArray(defaultMemArr)) {
+          const notExistedMems = await asyncFilter(defaultMemArr, async (memberId: number) => {
+            const existQuery = await myDataSource.manager.query(
+              `SELECT exists ( SELECT * FROM users WHERE users.id = ${memberId}) as exist`
+            )
+            const isExist = existQuery[0].exist === '1'
+            return !isExist
+          })
+          if (notExistedMems.length > 0) {
+            throw new Error(`${notExistedMems.toString()} ${notExistedMems.length > 1 ? 'are' : 'is'} not existed`)
+          }
+        } else throw new Error('Member list must be an array')
+      } else throw new Error('Member list must be an array')
       return true
     }),
   (req: Request, res: Response, next: NextFunction) => {
