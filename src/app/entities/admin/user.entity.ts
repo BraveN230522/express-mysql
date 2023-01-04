@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable } from 'typeorm'
+import { Tasks } from './task.entity'
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, OneToMany } from 'typeorm'
 import { Projects } from './project.entity'
 
 @Entity()
@@ -29,6 +30,9 @@ export class Users {
 
   @Column()
   status: string
+
+  @OneToMany(() => Tasks, (tasks) => tasks.user)
+  tasks: Tasks[]
 
   @ManyToMany(() => Projects, (project) => project.id, { cascade: true })
   @JoinTable({
