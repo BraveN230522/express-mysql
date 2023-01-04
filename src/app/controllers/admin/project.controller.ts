@@ -41,7 +41,7 @@ class ProjectControllerClass {
     const projectId = Number(req.params.id)
     const project = await myDataSource.getRepository(Projects).findOneBy({ id: projectId })
 
-    if (!project || _.isEmpty(project)) return res.status(404).json(dataMapping({ message: 'No project found' }))
+    if (!project || _.isEmpty(project)) return res.status(404).json(dataMapping({ message: 'No projects found' }))
 
     return res.status(200).json(
       dataMappingSuccess({

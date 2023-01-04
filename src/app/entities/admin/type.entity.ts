@@ -10,7 +10,7 @@ export class Types {
   name: string
 
   @Column()
-  order: number
+  color: string
 
   @OneToMany(() => Tasks, (task) => task.type)
   tasks: Tasks[]

@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable } from 'typeorm'
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Tasks } from './task.entity'
 import { Users } from './user.entity'
 
 @Entity()
@@ -12,11 +13,14 @@ export class Projects {
   @Column()
   slug: string
 
-  @Column()
-  startDate: string
+  @Column({ type: 'date' })
+  startDate: Date
 
-  @Column()
-  endDate: string
+  @Column({ type: 'date' })
+  endDate: Date
+
+  @OneToMany(() => Tasks, (tasks) => tasks.project)
+  tasks: Tasks[]
 
   @ManyToMany(() => Users, (user) => user.id, { cascade: true })
   @JoinTable({

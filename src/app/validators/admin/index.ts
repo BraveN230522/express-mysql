@@ -117,3 +117,66 @@ export const AddMemberToProjectValidation = [
     next()
   },
 ]
+
+export const createTaskValidation = [
+  check('name').notEmpty().withMessage('Name is a require field'),
+  check('projectId').notEmpty().withMessage('Project is a require field'),
+  check('startDate')
+    .notEmpty()
+    .withMessage('Start date is a require field')
+    .isDate({ format: 'YYYY-MM-DD' })
+    .withMessage('Start date is invalid')
+    .custom((startDate: string, { req }) => {
+      const endDate = req.body.endDate
+      const diffTime = moment(startDate, 'YYYY-MM-DD').diff(endDate)
+      return diffTime ? diffTime <= 0 : true
+    })
+    .withMessage('Start date must be less than end date'),
+
+  check('endDate')
+    .notEmpty()
+    .withMessage('End date is a require field')
+    .isDate({ format: 'YYYY-MM-DD' })
+    .withMessage('End date is invalid'),
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0] })
+    }
+    next()
+  },
+]
+
+export const createStatusValidation = [
+  check('name')
+    .notEmpty()
+    .withMessage('Name is a require field')
+    .custom(async (name: string, { req }) => {
+      const existQuery = await myDataSource.manager.query(
+        `SELECT exists ( SELECT * FROM statuses WHERE statuses.name = "${name}") as exist`
+      )
+      const isExist = existQuery[0].exist === '1'
+      if (isExist) throw new Error(`${name} is existed`)
+      return true
+    }),
+  check('order')
+    .notEmpty()
+    .withMessage('Order is a require field')
+    .custom(async (order: string, { req }) => {
+      const existQuery = await myDataSource.manager.query(
+        `SELECT exists ( SELECT * FROM statuses WHERE statuses.order = ${order}) as exist`
+      )
+      const isExist = existQuery[0].exist === '1'
+      if (isExist) throw new Error(`Order ${order} is existed`)
+      return true
+    }),
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0] })
+    }
+    next()
+  },
+]
