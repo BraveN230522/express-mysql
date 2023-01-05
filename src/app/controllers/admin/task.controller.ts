@@ -3,7 +3,7 @@ import _ from 'lodash'
 import { myDataSource } from '../../../configs'
 import { CACHING_TIME } from '../../../environments'
 import { dataMapping, dataMappingSuccess, genPagination, myMapOmit, numberInputs } from '../../../utilities'
-import { Projects, Tasks, Users } from '../../entities/admin'
+import { Priorities, Projects, Statuses, Tasks, Types, Users } from '../../entities/admin'
 // import { ADMIN_INFO, ADMIN_LOGIN, tokenAdmin } from '../../../db'
 
 class TaskControllerClass {
@@ -37,7 +37,9 @@ class TaskControllerClass {
 
   async getTaskDetails(req: Request, res: Response, next: NextFunction) {
     const taskId = Number(req.params.id)
-    const task = await myDataSource.getRepository(Tasks).findOneBy({ id: taskId })
+    const task = await myDataSource
+      .getRepository(Tasks)
+      .findOne({ where: { id: taskId }, relations: ['user', 'project', 'status', 'priority', 'type'] })
 
     if (!task || _.isEmpty(task)) return res.status(404).json(dataMapping({ message: 'No tasks found' }))
 
@@ -49,24 +51,31 @@ class TaskControllerClass {
   }
 
   async createTask(req: Request, res: Response, next: NextFunction) {
-    const { name, typeId, priorityId, statusId, startDate, endDate, userId, projectId } = req.body
-    const user = await myDataSource.getRepository(Users).findOneBy({ id: userId })
-    const project = await myDataSource.getRepository(Projects).findOneBy({ id: projectId })
+    try {
+      const { name, typeId, priorityId, statusId, startDate, endDate, userId, projectId } = req.body
+      const user = await myDataSource.getRepository(Users).findOneBy({ id: userId })
+      const project = await myDataSource.getRepository(Projects).findOneBy({ id: projectId })
+      const type = await myDataSource.getRepository(Types).findOneBy({ id: typeId })
+      const priority = await myDataSource.getRepository(Priorities).findOneBy({ id: priorityId })
+      const status = await myDataSource.getRepository(Statuses).findOneBy({ id: statusId })
 
-    if (user && project) {
-      const task = new Tasks()
-      task.name = name
-      task.type = typeId
-      task.priority = priorityId
-      task.status = statusId
-      task.startDate = startDate
-      task.endDate = endDate
-      task.user = user
-      task.project = project
+      if (user && project && type && priority && status) {
+        const task = new Tasks()
+        task.name = name
+        task.startDate = startDate
+        task.endDate = endDate
+        task.type = type
+        task.priority = priority
+        task.status = status
+        task.user = user
+        task.project = project
 
-      // await myDataSource.manager.save(task)
+        await myDataSource.manager.save(task)
 
-      res.status(200).json(dataMappingSuccess({ data: task }))
+        res.status(200).json(dataMappingSuccess({ data: task }))
+      }
+    } catch (error) {
+      res.status(400).json(dataMapping(error))
     }
   }
 }

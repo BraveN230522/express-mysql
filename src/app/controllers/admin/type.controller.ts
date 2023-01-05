@@ -19,7 +19,7 @@ class TypeControllerClass {
     type.name = name
     type.color = color
 
-    // await myDataSource.manager.save(type)
+    await myDataSource.manager.save(type)
 
     res.status(200).json(dataMappingSuccess({ data: type }))
   }

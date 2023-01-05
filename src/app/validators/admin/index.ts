@@ -138,6 +138,46 @@ export const createTaskValidation = [
     .withMessage('End date is a require field')
     .isDate({ format: 'YYYY-MM-DD' })
     .withMessage('End date is invalid'),
+  check('userId').custom(async (userId: string, { req }) => {
+    const existQuery = await myDataSource.manager.query(
+      `SELECT exists ( SELECT * FROM users WHERE users.id = "${userId}") as exist`
+    )
+    const isExist = existQuery[0].exist === '1'
+    if (!isExist) throw new Error(`UserId ${userId} is not existed`)
+    return true
+  }),
+  check('projectId').custom(async (projectId: string, { req }) => {
+    const existQuery = await myDataSource.manager.query(
+      `SELECT exists ( SELECT * FROM projects WHERE projects.id = "${projectId}") as exist`
+    )
+    const isExist = existQuery[0].exist === '1'
+    if (!isExist) throw new Error(`ProjectId ${projectId} is not existed`)
+    return true
+  }),
+  check('typeId').custom(async (typeId: string, { req }) => {
+    const existQuery = await myDataSource.manager.query(
+      `SELECT exists ( SELECT * FROM types WHERE types.id = "${typeId}") as exist`
+    )
+    const isExist = existQuery[0].exist === '1'
+    if (!isExist) throw new Error(`TypeId ${typeId} is not existed`)
+    return true
+  }),
+  check('priorityId').custom(async (priorityId: string, { req }) => {
+    const existQuery = await myDataSource.manager.query(
+      `SELECT exists ( SELECT * FROM priorities WHERE priorities.id = "${priorityId}") as exist`
+    )
+    const isExist = existQuery[0].exist === '1'
+    if (!isExist) throw new Error(`PriorityId ${priorityId} is not existed`)
+    return true
+  }),
+  check('statusId').custom(async (statusId: string, { req }) => {
+    const existQuery = await myDataSource.manager.query(
+      `SELECT exists ( SELECT * FROM statuses WHERE statuses.id = "${statusId}") as exist`
+    )
+    const isExist = existQuery[0].exist === '1'
+    if (!isExist) throw new Error(`StatusId ${statusId} is not existed`)
+    return true
+  }),
   (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req)
 
