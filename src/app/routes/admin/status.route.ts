@@ -6,6 +6,6 @@ import { createStatusValidation } from '../../validators/admin'
 const router = express.Router()
 
 router.get(authAdminRoutes.statuses, StatusController.getStatus)
-router.post(authAdminRoutes.statuses, createStatusValidation, StatusController.createStatus)
+router.post(authAdminRoutes.statuses, createStatusValidation(), StatusController.createStatus)
 
 export { router as adminStatusRouter }

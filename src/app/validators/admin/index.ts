@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { check, validationResult } from 'express-validator'
-import { asyncFilter, isJsonString } from '../../../utilities'
+import { asyncFilter, isHexColorRegex, isJsonString } from '../../../utilities'
 import { myDataSource } from '../../../configs'
 import moment from 'moment'
 
@@ -148,13 +148,13 @@ export const createTaskValidation = [
   },
 ]
 
-export const createStatusValidation = [
+export const createStatusValidation = (entity = 'statuses') => [
   check('name')
     .notEmpty()
     .withMessage('Name is a require field')
     .custom(async (name: string, { req }) => {
       const existQuery = await myDataSource.manager.query(
-        `SELECT exists ( SELECT * FROM statuses WHERE statuses.name = "${name}") as exist`
+        `SELECT exists ( SELECT * FROM ${entity} WHERE ${entity}.name = "${name}") as exist`
       )
       const isExist = existQuery[0].exist === '1'
       if (isExist) throw new Error(`${name} is existed`)
@@ -165,10 +165,39 @@ export const createStatusValidation = [
     .withMessage('Order is a require field')
     .custom(async (order: string, { req }) => {
       const existQuery = await myDataSource.manager.query(
-        `SELECT exists ( SELECT * FROM statuses WHERE statuses.order = ${order}) as exist`
+        `SELECT exists ( SELECT * FROM ${entity} WHERE ${entity}.order = ${order}) as exist`
       )
       const isExist = existQuery[0].exist === '1'
       if (isExist) throw new Error(`Order ${order} is existed`)
+      return true
+    }),
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0] })
+    }
+    next()
+  },
+]
+
+export const createTypeValidation = [
+  check('name')
+    .notEmpty()
+    .withMessage('Name is a require field')
+    .custom(async (name: string, { req }) => {
+      const existQuery = await myDataSource.manager.query(
+        `SELECT exists ( SELECT * FROM types WHERE types.name = "${name}") as exist`
+      )
+      const isExist = existQuery[0].exist === '1'
+      if (isExist) throw new Error(`${name} is existed`)
+      return true
+    }),
+  check('color')
+    .notEmpty()
+    .withMessage('Order is a require field')
+    .custom(async (color: string, { req }) => {
+      if (!isHexColorRegex(color)) throw new Error(`Color must be hex color`)
       return true
     }),
   (req: Request, res: Response, next: NextFunction) => {

@@ -31,6 +31,7 @@ class UserControllerClass {
         .status(200)
         .json(dataMappingSuccess({ data: mappingUsers, pagination: genPagination(page, perPage, usersLength) }))
     } catch (error) {
+      console.log({ error })
       res.status(500).json(error)
     }
   }
