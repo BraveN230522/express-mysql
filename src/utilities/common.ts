@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { ObjectAny } from '../interfaces'
 interface IDataMappingSuccess {
   data:
     | {
@@ -83,3 +84,9 @@ export const asyncFilter = async <T>(
   arr: T[],
   callbackfn: (value: T, index: number, array: T[]) => Promise<boolean>
 ): Promise<T[]> => Promise.all(_.map(arr, callbackfn)).then((results) => _.filter(arr, (_v, index) => results[index]))
+
+export const assignIfHasKey = (assignedObj: ObjectAny, obj: ObjectAny) => {
+  Object.entries(obj).forEach(([key, value]) => {
+    if (key) assignedObj[key] = value
+  })
+}

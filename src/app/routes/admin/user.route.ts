@@ -8,8 +8,9 @@ const router = express.Router()
 router.get(authAdminRoutes.users, UserController.getUser)
 router.get(authAdminRoutes.users + '/:id', UserController.getUserDetails)
 router.get(authAdminRoutes.users + '/projects/:id', UserController.getUserProjects)
+router.get(authAdminRoutes.users + '/tasks/:id', UserController.getUserTasks)
 router.get(authAdminRoutes.users + '/tasks/:id', UserController.getUserDetails)
 router.post(authAdminRoutes.users, createUserValidation, UserController.createUser)
-router.patch(authAdminRoutes.users + '/:id', updateUserValidation, UserController.updateUser)
+router.patch(authAdminRoutes.users + '/:id', updateUserValidation, updateUserValidation, UserController.updateUser)
 
 export { router as adminUserRouter }

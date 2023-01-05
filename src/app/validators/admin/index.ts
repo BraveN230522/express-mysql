@@ -57,9 +57,12 @@ export const createUserValidation = [
 ]
 
 export const updateUserValidation = [
-  check('email').isEmail().withMessage('Email is invalid'),
-  check('dob').notEmpty().withMessage('Date of birth is a require field'),
-  check('status').notEmpty().withMessage('Status is a require field'),
+  check('email').optional().isEmail().withMessage('Email is invalid'),
+  check('dob').optional().isDate().withMessage('Date of birth is invalid'),
+  check('status')
+    .optional()
+    .matches(/\b(?:active|inactive)\b/)
+    .withMessage('Status must be active or inactive'),
   (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req)
 

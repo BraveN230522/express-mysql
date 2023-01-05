@@ -2,6 +2,7 @@ import { UserStatus } from './../../../enums/user'
 import { NextFunction, Request, Response } from 'express'
 import { myDataSource } from '../../../configs'
 import {
+  assignIfHasKey,
   dataMapping,
   dataMappingSuccess,
   errorMapping,
@@ -10,7 +11,7 @@ import {
   myMapPick,
   numberInputs,
 } from '../../../utilities'
-import { Projects, Users } from '../../entities/admin'
+import { Projects, Tasks, Users } from '../../entities/admin'
 import _ from 'lodash'
 import { CACHING_TIME } from '../../../environments'
 import { In } from 'typeorm'
@@ -56,10 +57,12 @@ class UserControllerClass {
 
     if (!user || _.isEmpty(user)) return res.status(404).json(dataMapping({ message: 'No user found' }))
 
+    const mappingUser = _.omit(user, ['password'])
+
     return res.status(200).json(
       dataMappingSuccess({
         data: {
-          ...user,
+          ...mappingUser,
           projectCount: projects.length,
           taskCount: projects.length,
         },
@@ -96,7 +99,41 @@ class UserControllerClass {
           dataMappingSuccess({ data: projectsOfUser, pagination: genPagination(page, perPage, projectsOfUserLength) })
         )
     } catch (error) {
-      res.status(500).json(error)
+      res.status(400).json(errorMapping(error))
+    }
+  }
+
+  async getUserTasks(req: Request, res: Response, next: NextFunction) {
+    const { perPage, page } = numberInputs(req.body)
+    const userId = Number(req.params.id)
+    try {
+      const tasksOfUser = await myDataSource
+        .getRepository(Tasks)
+        .createQueryBuilder('tasks')
+        .distinct(true)
+        .innerJoinAndSelect('tasks.project', 'projects')
+        .innerJoin('users', 'u')
+        .select(['tasks', 'projects'])
+        .where('u.id = :id', { id: userId })
+        // .orderBy('tasks.id')
+        .skip((page - 1) * perPage)
+        .take(perPage || 1)
+        .getMany()
+
+      console.log({ tasksOfUser })
+
+      const tasksOfUserLength = await myDataSource
+        .createQueryBuilder(Tasks, 'tasks')
+        .cache(CACHING_TIME)
+        .innerJoin('users', 'users', 'users.id = tasks.userId')
+        .where('users.id = :id', { id: userId })
+        .getCount()
+
+      res
+        .status(200)
+        .json(dataMappingSuccess({ data: tasksOfUser, pagination: genPagination(page, perPage, tasksOfUserLength) }))
+    } catch (error) {
+      res.status(400).json(errorMapping(error))
     }
   }
 
@@ -118,25 +155,55 @@ class UserControllerClass {
     res.status(200).json(dataMappingSuccess({ data: mappingUser }))
   }
 
-  //TODO: Need to update
   async updateUser(req: Request, res: Response, next: NextFunction) {
-    const { name, email, dob, status } = req.body
-    const userId = Number(req.params.id)
-    const user = myDataSource.getRepository(Users)
-    const userToUpdate = await user.findOneBy({
-      id: userId,
-    })
+    try {
+      const userId = Number(req.params.id)
+      const userRepo = myDataSource.getRepository(Users)
+      const userToUpdate = await userRepo.findOneBy({
+        id: userId,
+      })
+      if (userToUpdate) {
+        assignIfHasKey(userToUpdate, req.body)
 
-    if (userToUpdate) {
-      userToUpdate.name = name
-      userToUpdate.email = email
-      userToUpdate.dob = dob
-      userToUpdate.status = status
+        const [__, userResponse] = await Promise.all([
+          userRepo.save(userToUpdate),
+          myDataSource.getRepository(Users).findOneBy({ id: userId }),
+        ])
+        if (userResponse) {
+          const mappingUser = _.omit({ ...userResponse, ...userToUpdate }, ['password'])
+          res.status(200).json(dataMappingSuccess({ data: mappingUser }))
+        }
+      } else {
+        res.status(400).json(errorMapping(`User not found`))
+      }
+    } catch (error) {
+      res.status(400).json(errorMapping(error))
+    }
+  }
 
-      await user.save(userToUpdate)
-      res.status(200).json(dataMappingSuccess({ data: userToUpdate }))
-    } else {
-      res.status(400).json(errorMapping(`User not found`))
+  async deleteUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = Number(req.params.id)
+      const userRepo = myDataSource.getRepository(Users)
+      const userToUpdate = await userRepo.findOneBy({
+        id: userId,
+      })
+      if (userToUpdate) {
+        assignIfHasKey(userToUpdate, req.body)
+
+        const [__, userResponse] = await Promise.all([
+          userRepo.save(userToUpdate),
+          myDataSource.getRepository(Users).findOneBy({ id: userId }),
+        ])
+        if (userResponse) {
+          const mappingUser = _.omit({ ...userResponse, ...userToUpdate }, ['password'])
+          res.status(200).json(dataMappingSuccess({ data: mappingUser }))
+        }
+      } else {
+        res.status(400).json(errorMapping(`User not found`))
+      }
+    } catch (error) {
+      res.status(400).json(errorMapping(error))
     }
   }
 }
