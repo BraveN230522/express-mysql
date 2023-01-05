@@ -19,6 +19,14 @@ export const dataMapping = <T>(data: T) => {
   return { data }
 }
 
+export const errorMapping = <T>(msg: T) => {
+  return {
+    error: {
+      msg: msg,
+    },
+  }
+}
+
 export const findObjectById = ({ arr, id }: { arr: Array<any>; id: String }) => {
   return _.find(arr, (item) => (item.id || item.inviteId) === id)
 }

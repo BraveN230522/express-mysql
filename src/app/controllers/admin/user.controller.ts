@@ -1,7 +1,15 @@
 import { UserStatus } from './../../../enums/user'
 import { NextFunction, Request, Response } from 'express'
 import { myDataSource } from '../../../configs'
-import { dataMapping, dataMappingSuccess, genPagination, myMapOmit, myMapPick, numberInputs } from '../../../utilities'
+import {
+  dataMapping,
+  dataMappingSuccess,
+  errorMapping,
+  genPagination,
+  myMapOmit,
+  myMapPick,
+  numberInputs,
+} from '../../../utilities'
 import { Projects, Users } from '../../entities/admin'
 import _ from 'lodash'
 import { CACHING_TIME } from '../../../environments'
@@ -108,6 +116,28 @@ class UserControllerClass {
     //Response handling
     const mappingUser = _.omit(user, ['projects'])
     res.status(200).json(dataMappingSuccess({ data: mappingUser }))
+  }
+
+  //TODO: Need to update
+  async updateUser(req: Request, res: Response, next: NextFunction) {
+    const { name, email, dob, status } = req.body
+    const userId = Number(req.params.id)
+    const user = myDataSource.getRepository(Users)
+    const userToUpdate = await user.findOneBy({
+      id: userId,
+    })
+
+    if (userToUpdate) {
+      userToUpdate.name = name
+      userToUpdate.email = email
+      userToUpdate.dob = dob
+      userToUpdate.status = status
+
+      await user.save(userToUpdate)
+      res.status(200).json(dataMappingSuccess({ data: userToUpdate }))
+    } else {
+      res.status(400).json(errorMapping(`User not found`))
+    }
   }
 }
 

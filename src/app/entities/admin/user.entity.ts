@@ -19,6 +19,13 @@ export class Users {
   @Column({
     nullable: true,
     default: null,
+    type: 'date',
+  })
+  dob?: Date
+
+  @Column({
+    nullable: true,
+    default: null,
   })
   email: string
 

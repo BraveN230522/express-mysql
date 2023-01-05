@@ -56,6 +56,20 @@ export const createUserValidation = [
   },
 ]
 
+export const updateUserValidation = [
+  check('email').isEmail().withMessage('Email is invalid'),
+  check('dob').notEmpty().withMessage('Date of birth is a require field'),
+  check('status').notEmpty().withMessage('Status is a require field'),
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0] })
+    }
+    next()
+  },
+]
+
 export const createProjectValidation = [
   check('name').notEmpty().withMessage('Name is a require field'),
   check('slug').notEmpty().withMessage('Slug is a require field'),
