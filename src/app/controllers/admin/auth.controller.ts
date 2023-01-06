@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import _ from 'lodash'
 import { myDataSource } from '../../../configs'
-import { JWT_KEY } from '../../../environments'
+import { JWT_KEY, SALT_ROUNDS } from '../../../environments'
 import { dataMappingSuccess } from '../../../utilities'
 import { Auth } from '../../entities/admin'
 
@@ -13,8 +13,17 @@ class AuthControllerClass {
       username: req.body.username,
     })
 
-    const match = await bcrypt.compare(req.body.password || '', user?.password || '')
-    if (!match) return res.status(401).send({ error: 'Login failed! Check authentication credentials' })
+    // bcrypt.genSalt(SALT_ROUNDS, function (err, salt) {
+    //   bcrypt.hash('123', salt, function (err, hash) {
+    //     console.log({ hash })
+    //     // Store hash in your password DB.
+    //   })
+    // })
+    // return
+
+    const match =
+      (await bcrypt.compare(req.body.password || '', user?.password || '')) && req.body.username === user?.username
+    if (!match) return res.status(401).send({ error: 'Username or password is incorrect' })
 
     const token = jwt.sign({ id: user?.id, username: user?.username }, JWT_KEY || '1')
     const mappingUser = _.omit({ ...user, token: 'Bearer ' + token }, ['password'])

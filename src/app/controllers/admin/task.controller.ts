@@ -11,7 +11,6 @@ import {
   numberInputs,
 } from '../../../utilities'
 import { Priorities, Projects, Statuses, Tasks, Types, Users } from '../../entities/admin'
-// import { ADMIN_INFO, ADMIN_LOGIN, tokenAdmin } from '../../../db'
 
 class TaskControllerClass {
   async getTask(req: Request, res: Response, next: NextFunction) {
@@ -77,7 +76,7 @@ class TaskControllerClass {
         task.user = user
         task.project = project
 
-        // await myDataSource.manager.save(task)
+        await myDataSource.manager.save(task)
 
         res.status(200).json(dataMappingSuccess({ data: task }))
       }
