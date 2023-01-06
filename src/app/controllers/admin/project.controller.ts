@@ -1,7 +1,15 @@
 import { UserStatus } from '../../../enums/user'
 import { NextFunction, Request, Response } from 'express'
 import { myDataSource } from '../../../configs'
-import { dataMapping, dataMappingSuccess, genPagination, myMapOmit, myMapPick, numberInputs } from '../../../utilities'
+import {
+  dataMapping,
+  dataMappingSuccess,
+  errorMapping,
+  genPagination,
+  myMapOmit,
+  myMapPick,
+  numberInputs,
+} from '../../../utilities'
 import { Projects, Users } from '../../entities/admin'
 import _ from 'lodash'
 import { CACHING_TIME } from '../../../environments'
@@ -53,6 +61,9 @@ class ProjectControllerClass {
   async getProjectMembers(req: Request, res: Response, next: NextFunction) {
     const projectId = Number(req.params.id)
     const { perPage, page } = numberInputs(req.body)
+    const project = await myDataSource.getRepository(Projects).findOneBy({ id: projectId })
+
+    if (!project || _.isEmpty(project)) return res.status(404).json(dataMapping({ message: 'No projects found' }))
     try {
       const projectMembersLength = await myDataSource
         .createQueryBuilder(Users, 'users')
@@ -113,6 +124,8 @@ class ProjectControllerClass {
 
       await projectRepository.save(projectToUpdate)
       res.status(200).json(dataMappingSuccess({ data: projectToUpdate }))
+    } else {
+      return res.status(404).json(dataMapping({ message: 'No projects found' }))
     }
   }
 
@@ -133,6 +146,8 @@ class ProjectControllerClass {
       projectToUpdate.users = [...projectToUpdate.users, ...memberShouldBeAdded]
       await projectRepository.save(projectToUpdate)
       res.status(200).json(dataMappingSuccess({ data: projectToUpdate }))
+    } else {
+      return res.status(404).json(dataMapping({ message: 'No projects found' }))
     }
   }
 
@@ -154,6 +169,29 @@ class ProjectControllerClass {
       projectToUpdate.users = [...memberAfterRemoving]
       await projectRepository.save(projectToUpdate)
       res.status(200).json(dataMappingSuccess({ data: projectToUpdate }))
+    } else {
+      return res.status(404).json(dataMapping({ message: 'No projects found' }))
+    }
+  }
+
+  async deleteProject(req: Request, res: Response, next: NextFunction) {
+    try {
+      const projectId = Number(req.params.id)
+      const projectToUpdate = await myDataSource.getRepository(Projects).findOneBy({
+        id: projectId,
+      })
+      if (projectToUpdate)
+        myDataSource
+          .createQueryBuilder(Projects, 'projects')
+          .delete()
+          .from(Projects)
+          .where('id = :id', { id: projectId })
+          .execute()
+      else return res.status(404).json(errorMapping('Project not found'))
+
+      return res.status(200).json(dataMapping({ message: 'Delete project successfully' }))
+    } catch (error) {
+      return res.status(400).json(errorMapping(error))
     }
   }
 }

@@ -11,6 +11,7 @@ router.get(authAdminRoutes.users + '/projects/:id', UserController.getUserProjec
 router.get(authAdminRoutes.users + '/tasks/:id', UserController.getUserTasks)
 router.get(authAdminRoutes.users + '/tasks/:id', UserController.getUserDetails)
 router.post(authAdminRoutes.users, createUserValidation, UserController.createUser)
-router.patch(authAdminRoutes.users + '/:id', updateUserValidation, updateUserValidation, UserController.updateUser)
+router.patch(authAdminRoutes.users + '/:id', updateUserValidation, UserController.updateUser)
+router.delete(authAdminRoutes.users + '/:id', UserController.deleteUser)
 
 export { router as adminUserRouter }

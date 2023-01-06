@@ -58,7 +58,15 @@ export const createUserValidation = [
 
 export const updateUserValidation = [
   check('email').optional().isEmail().withMessage('Email is invalid'),
-  check('dob').optional().isDate().withMessage('Date of birth is invalid'),
+  check('dob')
+    .optional()
+    .isDate()
+    .withMessage('Date of birth is invalid')
+    .custom((dob: string, { req }) => {
+      const diffTime = moment(dob, 'YYYY-MM-DD').diff(new Date())
+      return diffTime ? diffTime <= 0 : true
+    })
+    .withMessage('Date of birth can not be in future'),
   check('status')
     .optional()
     .matches(/\b(?:active|inactive)\b/)

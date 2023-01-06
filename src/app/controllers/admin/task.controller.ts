@@ -2,7 +2,14 @@ import { NextFunction, Request, Response } from 'express'
 import _ from 'lodash'
 import { myDataSource } from '../../../configs'
 import { CACHING_TIME } from '../../../environments'
-import { dataMapping, dataMappingSuccess, genPagination, myMapOmit, numberInputs } from '../../../utilities'
+import {
+  dataMapping,
+  dataMappingSuccess,
+  errorMapping,
+  genPagination,
+  myMapOmit,
+  numberInputs,
+} from '../../../utilities'
 import { Priorities, Projects, Statuses, Tasks, Types, Users } from '../../entities/admin'
 // import { ADMIN_INFO, ADMIN_LOGIN, tokenAdmin } from '../../../db'
 
@@ -76,6 +83,22 @@ class TaskControllerClass {
       }
     } catch (error) {
       res.status(400).json(dataMapping(error))
+    }
+  }
+
+  async deleteTask(req: Request, res: Response, next: NextFunction) {
+    try {
+      const taskId = Number(req.params.id)
+      const taskToUpdate = await myDataSource.getRepository(Tasks).findOneBy({
+        id: taskId,
+      })
+      if (taskToUpdate)
+        myDataSource.createQueryBuilder(Tasks, 'tasks').delete().from(Tasks).where('id = :id', { id: taskId }).execute()
+      else return res.status(404).json(errorMapping('Task not found'))
+
+      return res.status(200).json(dataMapping({ message: 'Delete task successfully' }))
+    } catch (error) {
+      return res.status(400).json(errorMapping(error))
     }
   }
 }

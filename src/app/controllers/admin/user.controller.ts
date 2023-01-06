@@ -73,6 +73,10 @@ class UserControllerClass {
   async getUserProjects(req: Request, res: Response, next: NextFunction) {
     const { perPage, page } = numberInputs(req.body)
     const userId = Number(req.params.id)
+    const user = await myDataSource.getRepository(Users).findOneBy({ id: userId })
+
+    if (!user || _.isEmpty(user)) return res.status(404).json(dataMapping({ message: 'No user found' }))
+
     try {
       const projectsOfUser = await myDataSource
         .createQueryBuilder(Projects, 'projects')
@@ -106,6 +110,10 @@ class UserControllerClass {
   async getUserTasks(req: Request, res: Response, next: NextFunction) {
     const { perPage, page } = numberInputs(req.body)
     const userId = Number(req.params.id)
+    const user = await myDataSource.getRepository(Users).findOneBy({ id: userId })
+
+    if (!user || _.isEmpty(user)) return res.status(404).json(dataMapping({ message: 'No user found' }))
+
     try {
       const tasksOfUser = await myDataSource
         .getRepository(Tasks)
@@ -184,26 +192,16 @@ class UserControllerClass {
   async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = Number(req.params.id)
-      const userRepo = myDataSource.getRepository(Users)
-      const userToUpdate = await userRepo.findOneBy({
+      const userToUpdate = await myDataSource.getRepository(Users).findOneBy({
         id: userId,
       })
-      if (userToUpdate) {
-        assignIfHasKey(userToUpdate, req.body)
+      if (userToUpdate)
+        myDataSource.createQueryBuilder(Users, 'users').delete().from(Users).where('id = :id', { id: userId }).execute()
+      else return res.status(404).json(errorMapping('User not found'))
 
-        const [__, userResponse] = await Promise.all([
-          userRepo.save(userToUpdate),
-          myDataSource.getRepository(Users).findOneBy({ id: userId }),
-        ])
-        if (userResponse) {
-          const mappingUser = _.omit({ ...userResponse, ...userToUpdate }, ['password'])
-          res.status(200).json(dataMappingSuccess({ data: mappingUser }))
-        }
-      } else {
-        res.status(400).json(errorMapping(`User not found`))
-      }
+      return res.status(200).json(dataMapping({ message: 'Delete user successfully' }))
     } catch (error) {
-      res.status(400).json(errorMapping(error))
+      return res.status(400).json(errorMapping(error))
     }
   }
 }

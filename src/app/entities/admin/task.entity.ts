@@ -19,18 +19,18 @@ export class Tasks {
   @Column({ type: 'date' })
   endDate: Date
 
-  @ManyToOne(() => Users, (user) => user.tasks)
+  @ManyToOne(() => Users, (user) => user.tasks, { onDelete: 'CASCADE' })
   user: Users
 
-  @ManyToOne(() => Projects, (project) => project.tasks)
+  @ManyToOne(() => Projects, (project) => project.tasks, { onDelete: 'CASCADE' })
   project: Projects
 
-  @ManyToOne(() => Priorities, (priority) => priority.tasks)
+  @ManyToOne(() => Priorities, (priority) => priority.tasks, { onDelete: 'CASCADE' })
   priority: Priorities
 
-  @ManyToOne(() => Statuses, (status) => status.tasks)
+  @ManyToOne(() => Statuses, (status) => status.tasks, { onDelete: 'CASCADE' })
   status: Statuses
 
-  @ManyToOne(() => Types, (type) => type.tasks)
+  @ManyToOne(() => Types, (type) => type.tasks, { onDelete: 'CASCADE' })
   type: Types
 }

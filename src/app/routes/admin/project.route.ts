@@ -24,6 +24,6 @@ router.delete(
   removeMemberToProjectValidation,
   ProjectController.removeMemberToProject
 )
-// router.get(authAdminRoutes.projects + '/tasks/:id', ProjectController.getProjectDetails)
+router.delete(authAdminRoutes.projects + '/:id', ProjectController.deleteProject)
 
 export { router as adminProjectRouter }
