@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { myDataSource } from '../../../configs'
-import { dataMapping, dataMappingSuccess } from '../../../utilities'
+import { assignIfHasKey, dataMapping, dataMappingSuccess, errorMapping } from '../../../utilities'
 import { Priorities } from '../../entities/admin'
 // import { ADMIN_INFO, ADMIN_LOGIN, tokenAdmin } from '../../../db'
 
@@ -23,6 +23,32 @@ class PriorityControllerClass {
     await myDataSource.manager.save(priority)
 
     res.status(200).json(dataMappingSuccess({ data: priority }))
+  }
+
+  async updatePriority(req: Request, res: Response, next: NextFunction) {
+    try {
+      const priorityId = Number(req.params.id)
+      const statusRepo = myDataSource.getRepository(Priorities)
+      const statusToUpdate = await statusRepo.findOneBy({
+        id: priorityId,
+      })
+      if (statusToUpdate) {
+        assignIfHasKey(statusToUpdate, req.body)
+
+        const [__, statusResponse] = await Promise.all([
+          statusRepo.save(statusToUpdate),
+          myDataSource.getRepository(Priorities).findOneBy({ id: priorityId }),
+        ])
+        if (statusResponse) {
+          const mappingPriority = { ...statusResponse, ...statusToUpdate }
+          res.status(200).json(dataMappingSuccess({ data: mappingPriority }))
+        }
+      } else {
+        res.status(400).json(errorMapping(`Priority not found`))
+      }
+    } catch (error) {
+      res.status(400).json(errorMapping(error))
+    }
   }
 }
 

@@ -12,6 +12,9 @@ export class Priorities {
   @Column()
   order: string
 
+  @Column({ type: 'bool' })
+  isShow: boolean
+
   @OneToMany(() => Tasks, (task) => task.priority)
   tasks: Tasks[]
 }

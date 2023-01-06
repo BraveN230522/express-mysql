@@ -12,6 +12,9 @@ export class Statuses {
   @Column()
   order: number
 
+  @Column({ type: 'bool' })
+  isShow: boolean
+
   @OneToMany(() => Tasks, (task) => task.status)
   tasks: Tasks[]
 }

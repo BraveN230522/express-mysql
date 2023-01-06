@@ -12,6 +12,9 @@ export class Types {
   @Column()
   color: string
 
+  @Column({ type: 'bool' })
+  isShow: boolean
+
   @OneToMany(() => Tasks, (task) => task.type)
   tasks: Tasks[]
 }

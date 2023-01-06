@@ -327,3 +327,46 @@ export const createTypeValidation = [
     next()
   },
 ]
+
+export const updateTypeValidation = [
+  check('color')
+    .optional()
+    .custom(async (color: string, { req }) => {
+      if (!isHexColorRegex(color)) throw new Error(`Color must be hex color`)
+      return true
+    }),
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0] })
+    }
+    next()
+  },
+]
+
+export const isShowValidation = [
+  check('isShow')
+    .optional()
+    .matches(/\b(?:1|0)\b/)
+    .withMessage('isShow must be 1 or 0'),
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0] })
+    }
+    next()
+  },
+]
+export const orderValidation = [
+  check('order').optional().isInt().withMessage('order must be integer'),
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0] })
+    }
+    next()
+  },
+]

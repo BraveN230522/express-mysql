@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 import { myDataSource } from '../../../configs'
-import { dataMapping, dataMappingSuccess } from '../../../utilities'
+import { assignIfHasKey, dataMapping, dataMappingSuccess, errorMapping } from '../../../utilities'
 import { Types } from '../../entities/admin'
-// import { ADMIN_INFO, ADMIN_LOGIN, tokenAdmin } from '../../../db'
+import _ from 'lodash'
 
 class TypeControllerClass {
   async getType(req: Request, res: Response, next: NextFunction) {
@@ -22,6 +22,32 @@ class TypeControllerClass {
     await myDataSource.manager.save(type)
 
     res.status(200).json(dataMappingSuccess({ data: type }))
+  }
+
+  async updateType(req: Request, res: Response, next: NextFunction) {
+    try {
+      const typeId = Number(req.params.id)
+      const typeRepo = myDataSource.getRepository(Types)
+      const typeToUpdate = await typeRepo.findOneBy({
+        id: typeId,
+      })
+      if (typeToUpdate) {
+        assignIfHasKey(typeToUpdate, req.body)
+
+        const [__, typeResponse] = await Promise.all([
+          typeRepo.save(typeToUpdate),
+          myDataSource.getRepository(Types).findOneBy({ id: typeId }),
+        ])
+        if (typeResponse) {
+          const mappingUser = { ...typeResponse, ...typeToUpdate }
+          res.status(200).json(dataMappingSuccess({ data: mappingUser }))
+        }
+      } else {
+        res.status(400).json(errorMapping(`User not found`))
+      }
+    } catch (error) {
+      res.status(400).json(errorMapping(error))
+    }
   }
 }
 
