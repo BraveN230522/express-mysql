@@ -122,7 +122,45 @@ export const AddMemberToProjectValidation = [
             throw new Error(`${notExistedMems.toString()} ${notExistedMems.length > 1 ? 'are' : 'is'} not existed`)
           }
         } else throw new Error('Member list must be an array')
-      } else throw new Error('Member list must be an array')
+      } else throw new Error('Member list is invalid')
+      return true
+    }),
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0] })
+    }
+    next()
+  },
+]
+
+export const removeMemberToProjectValidation = [
+  check('memberIds')
+    .notEmpty()
+    .withMessage('Member list is a require field')
+    .custom(async (memberIds: string, { req }) => {
+      const projectId = req.params?.id
+      if (isJsonString(req.body.memberIds)) {
+        const defaultMemArr: number[] = JSON.parse(memberIds)
+        if (Array.isArray(defaultMemArr)) {
+          const notExistedMems = await asyncFilter(defaultMemArr, async (memberId: number) => {
+            const existQuery = await myDataSource.manager.query(
+              `SELECT exists ( select * from users 
+                join users_projects on users.id = users_projects.userId 
+                join projects on projects.id = users_projects.projectId 
+                WHERE users.id = ${memberId} and projects.id =${projectId}) as exist`
+            )
+            const isExist = existQuery[0].exist === '1'
+            return !isExist
+          })
+          if (notExistedMems.length > 0) {
+            throw new Error(
+              `${notExistedMems.toString()} ${notExistedMems.length > 1 ? 'are' : 'is'} not in this project`
+            )
+          }
+        } else throw new Error('Member list must be an array')
+      } else throw new Error('Member list is invalid')
       return true
     }),
   (req: Request, res: Response, next: NextFunction) => {

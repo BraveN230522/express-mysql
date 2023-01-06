@@ -1,7 +1,11 @@
 import express from 'express'
 import { authAdminRoutes } from '../../../configs'
 import { ProjectController } from '../../controllers/admin'
-import { AddMemberToProjectValidation, createProjectValidation } from '../../validators/admin'
+import {
+  AddMemberToProjectValidation,
+  createProjectValidation,
+  removeMemberToProjectValidation,
+} from '../../validators/admin'
 
 const router = express.Router()
 
@@ -14,6 +18,11 @@ router.patch(
   authAdminRoutes.projects + '/member/:id',
   AddMemberToProjectValidation,
   ProjectController.AddMemberToProject
+)
+router.delete(
+  authAdminRoutes.projects + '/member/:id',
+  removeMemberToProjectValidation,
+  ProjectController.removeMemberToProject
 )
 // router.get(authAdminRoutes.projects + '/tasks/:id', ProjectController.getProjectDetails)
 

@@ -135,6 +135,27 @@ class ProjectControllerClass {
       res.status(200).json(dataMappingSuccess({ data: projectToUpdate }))
     }
   }
+
+  async removeMemberToProject(req: Request, res: Response, next: NextFunction) {
+    const projectId = Number(req.params.id)
+    const projectRepository = myDataSource.getRepository(Projects)
+    const projectToUpdate = await projectRepository.findOne({
+      where: { id: projectId },
+      relations: ['users'],
+    })
+
+    const members: number[] = JSON.parse(req.body.memberIds)
+
+    if (projectToUpdate) {
+      const memberAfterRemoving = _.remove(projectToUpdate.users, function (user) {
+        return !members.includes(user.id)
+      })
+
+      projectToUpdate.users = [...memberAfterRemoving]
+      await projectRepository.save(projectToUpdate)
+      res.status(200).json(dataMappingSuccess({ data: projectToUpdate }))
+    }
+  }
 }
 
 export const ProjectController = new ProjectControllerClass()
