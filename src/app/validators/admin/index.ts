@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 import { check, validationResult } from 'express-validator'
-import { asyncFilter, isHexColorRegex, isJsonString } from '../../../utilities'
-import { myDataSource } from '../../../configs'
 import moment from 'moment'
+import { myDataSource } from '../../../configs'
+import { asyncFilter, isHexColorRegex, isJsonString } from '../../../utilities'
 import { Projects } from '../../entities/admin'
 
 export const loginValidation = [

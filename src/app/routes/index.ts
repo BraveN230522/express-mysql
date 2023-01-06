@@ -1,5 +1,8 @@
 import { Express, NextFunction, Request, Response } from 'express'
 import { expressjwt } from 'express-jwt'
+import { adminRoute, myDataSource, noAuthAdminRoutes } from '../../configs'
+import { noAuthRoutesToArr } from '../../utilities'
+import { Auth } from '../entities/admin'
 import {
   adminAuthRouter,
   adminPriorityRouter,
@@ -9,9 +12,6 @@ import {
   adminTypeRouter,
   adminUserRouter,
 } from './admin'
-import { adminRoute, myDataSource, noAuthAdminRoutes } from '../../configs'
-import { Auth } from '../entities/admin'
-import { noAuthRoutesToArr } from '../../utilities'
 
 export const route = (app: Express) => {
   app.use(

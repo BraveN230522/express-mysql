@@ -1,6 +1,8 @@
-import { UserStatus } from './../../../enums/user'
 import { NextFunction, Request, Response } from 'express'
+import _ from 'lodash'
+import { In } from 'typeorm'
 import { myDataSource } from '../../../configs'
+import { CACHING_TIME } from '../../../environments'
 import {
   assignIfHasKey,
   dataMapping,
@@ -8,13 +10,10 @@ import {
   errorMapping,
   genPagination,
   myMapOmit,
-  myMapPick,
   numberInputs,
 } from '../../../utilities'
 import { Projects, Tasks, Users } from '../../entities/admin'
-import _ from 'lodash'
-import { CACHING_TIME } from '../../../environments'
-import { In } from 'typeorm'
+import { UserStatus } from './../../../enums/user'
 
 class UserControllerClass {
   async getUser(req: Request, res: Response, next: NextFunction) {

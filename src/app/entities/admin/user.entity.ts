@@ -1,6 +1,6 @@
-import { Tasks } from './task.entity'
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, OneToMany } from 'typeorm'
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { Projects } from './project.entity'
+import { Tasks } from './task.entity'
 
 @Entity()
 export class Users {

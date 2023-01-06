@@ -1,12 +1,9 @@
-// import { USERS } from './db'
-import express, { Express, Request, Response } from 'express'
 import dotenv from 'dotenv'
+import express, { Express } from 'express'
 import morgan from 'morgan'
 import multer from 'multer'
-import { myDataSource } from './configs'
 import { route } from './app/routes'
-// import { route } from './routes'
-// import bodyParser from 'body-parser'import { DataSource } from 'typeorm'
+import { myDataSource } from './configs'
 
 dotenv.config()
 
@@ -17,7 +14,7 @@ const upload = multer()
 // for parsing application/json
 app.use(express.json())
 
-// for parsing application/xwww-
+// for parsing application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }))
 
 // for parsing multipart/form-data
@@ -35,15 +32,6 @@ myDataSource
   .catch((err) => {
     console.error('Error during Data Source initialization:', err)
   })
-
-// app.get('/users', function (req, res) {
-//   console.log(123)
-//   var sql = 'SELECT * FROM users'
-//   mysqlCon.query(sql, function (err, results) {
-//     if (err) throw err
-//     res.send(results)
-//   })
-// })
 
 route(app)
 

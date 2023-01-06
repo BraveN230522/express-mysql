@@ -1,13 +1,11 @@
-import { NextFunction, Request, Response } from 'express'
-import { validationResult } from 'express-validator'
-import jwt from 'jsonwebtoken'
-import { myDataSource } from '../../../configs'
-import { Auth, Users } from '../../entities/admin'
 import bcrypt from 'bcrypt'
-import { JWT_KEY, SALT_ROUNDS } from '../../../environments'
-import { dataMappingSuccess } from '../../../utilities'
+import { NextFunction, Request, Response } from 'express'
+import jwt from 'jsonwebtoken'
 import _ from 'lodash'
-// import { ADMIN_INFO, ADMIN_LOGIN, tokenAdmin } from '../../../db'
+import { myDataSource } from '../../../configs'
+import { JWT_KEY } from '../../../environments'
+import { dataMappingSuccess } from '../../../utilities'
+import { Auth } from '../../entities/admin'
 
 class AuthControllerClass {
   async login(req: Request, res: Response, next: NextFunction) {

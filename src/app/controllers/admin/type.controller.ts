@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express'
 import { myDataSource } from '../../../configs'
 import { assignIfHasKey, dataMapping, dataMappingSuccess, errorMapping } from '../../../utilities'
 import { Types } from '../../entities/admin'
-import _ from 'lodash'
 
 class TypeControllerClass {
   async getType(req: Request, res: Response, next: NextFunction) {

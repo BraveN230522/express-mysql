@@ -1,9 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm'
-import { Users } from './user.entity'
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import { Priorities } from './priority.entity'
+import { Projects } from './project.entity'
 import { Statuses } from './status.entity'
 import { Types } from './type.entity'
-import { Projects } from './project.entity'
+import { Users } from './user.entity'
 
 @Entity()
 export class Tasks {

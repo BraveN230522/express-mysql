@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express'
 import { myDataSource } from '../../../configs'
 import { assignIfHasKey, dataMapping, dataMappingSuccess, errorMapping } from '../../../utilities'
 import { Priorities } from '../../entities/admin'
-// import { ADMIN_INFO, ADMIN_LOGIN, tokenAdmin } from '../../../db'
 
 class PriorityControllerClass {
   async getPriority(req: Request, res: Response, next: NextFunction) {
