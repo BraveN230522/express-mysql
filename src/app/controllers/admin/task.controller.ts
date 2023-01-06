@@ -77,12 +77,42 @@ class TaskControllerClass {
         task.user = user
         task.project = project
 
-        await myDataSource.manager.save(task)
+        // await myDataSource.manager.save(task)
 
         res.status(200).json(dataMappingSuccess({ data: task }))
       }
     } catch (error) {
       res.status(400).json(dataMapping(error))
+    }
+  }
+
+  async updateTask(req: Request, res: Response, next: NextFunction) {
+    const { name, typeId, priorityId, statusId, startDate, endDate, userId, projectId } = req.body
+    const taskId = Number(req.params.id)
+    const taskRepository = myDataSource.getRepository(Tasks)
+    const taskToUpdate = await taskRepository.findOneBy({
+      id: taskId,
+    })
+    const user = await myDataSource.getRepository(Users).findOneBy({ id: userId })
+    const project = await myDataSource.getRepository(Projects).findOneBy({ id: projectId })
+    const type = await myDataSource.getRepository(Types).findOneBy({ id: typeId })
+    const priority = await myDataSource.getRepository(Priorities).findOneBy({ id: priorityId })
+    const status = await myDataSource.getRepository(Statuses).findOneBy({ id: statusId })
+
+    if (taskToUpdate && type && priority && status && user && project) {
+      taskToUpdate.name = name
+      taskToUpdate.type = type
+      taskToUpdate.priority = priority
+      taskToUpdate.status = status
+      taskToUpdate.startDate = startDate
+      taskToUpdate.endDate = endDate
+      taskToUpdate.user = user
+      taskToUpdate.project = project
+
+      await taskRepository.save(taskToUpdate)
+      res.status(200).json(dataMappingSuccess({ data: taskToUpdate }))
+    } else {
+      return res.status(404).json(dataMapping({ message: 'No tasks found' }))
     }
   }
 

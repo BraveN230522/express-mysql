@@ -3,6 +3,7 @@ import { check, validationResult } from 'express-validator'
 import { asyncFilter, isHexColorRegex, isJsonString } from '../../../utilities'
 import { myDataSource } from '../../../configs'
 import moment from 'moment'
+import { Projects } from '../../entities/admin'
 
 export const loginValidation = [
   check('username').notEmpty().withMessage('Username is a require field'),
@@ -189,18 +190,28 @@ export const createTaskValidation = [
     .withMessage('Start date is a require field')
     .isDate({ format: 'YYYY-MM-DD' })
     .withMessage('Start date is invalid')
-    .custom((startDate: string, { req }) => {
+    .custom(async (startDate: string, { req }) => {
       const endDate = req.body.endDate
-      const diffTime = moment(startDate, 'YYYY-MM-DD').diff(endDate)
-      return diffTime ? diffTime <= 0 : true
-    })
-    .withMessage('Start date must be less than end date'),
+      const projectId = req.body.projectId
+      const project = await myDataSource.getRepository(Projects).findOneBy({ id: projectId })
+      const diffTimeWithEndDate = moment(startDate, 'YYYY-MM-DD').diff(endDate)
+      const diffTimeWithProject = moment(startDate, 'YYYY-MM-DD').diff(project?.startDate)
 
+      if (diffTimeWithEndDate > 0) throw new Error(`Start date must be less than end date`)
+      if (diffTimeWithProject < 0) throw new Error(`Start date must be greater than start date of project`)
+    }),
   check('endDate')
     .notEmpty()
     .withMessage('End date is a require field')
     .isDate({ format: 'YYYY-MM-DD' })
-    .withMessage('End date is invalid'),
+    .withMessage('End date is invalid')
+    .custom(async (endDate: string, { req }) => {
+      const projectId = req.body.projectId
+      const project = await myDataSource.getRepository(Projects).findOneBy({ id: projectId })
+      const diffTimeWithProject = moment(endDate, 'YYYY-MM-DD').diff(project?.endDate)
+      if (diffTimeWithProject > 0) throw new Error(`End date must be greater than end date of project`)
+    }),
+
   check('userId').custom(async (userId: string, { req }) => {
     const existQuery = await myDataSource.manager.query(
       `SELECT exists ( SELECT * FROM users WHERE users.id = "${userId}") as exist`
@@ -209,6 +220,7 @@ export const createTaskValidation = [
     if (!isExist) throw new Error(`UserId ${userId} is not existed`)
     return true
   }),
+
   check('projectId').custom(async (projectId: string, { req }) => {
     const existQuery = await myDataSource.manager.query(
       `SELECT exists ( SELECT * FROM projects WHERE projects.id = "${projectId}") as exist`
@@ -217,6 +229,7 @@ export const createTaskValidation = [
     if (!isExist) throw new Error(`ProjectId ${projectId} is not existed`)
     return true
   }),
+
   check('typeId').custom(async (typeId: string, { req }) => {
     const existQuery = await myDataSource.manager.query(
       `SELECT exists ( SELECT * FROM types WHERE types.id = "${typeId}") as exist`
@@ -225,6 +238,7 @@ export const createTaskValidation = [
     if (!isExist) throw new Error(`TypeId ${typeId} is not existed`)
     return true
   }),
+
   check('priorityId').custom(async (priorityId: string, { req }) => {
     const existQuery = await myDataSource.manager.query(
       `SELECT exists ( SELECT * FROM priorities WHERE priorities.id = "${priorityId}") as exist`
@@ -233,6 +247,7 @@ export const createTaskValidation = [
     if (!isExist) throw new Error(`PriorityId ${priorityId} is not existed`)
     return true
   }),
+
   check('statusId').custom(async (statusId: string, { req }) => {
     const existQuery = await myDataSource.manager.query(
       `SELECT exists ( SELECT * FROM statuses WHERE statuses.id = "${statusId}") as exist`
